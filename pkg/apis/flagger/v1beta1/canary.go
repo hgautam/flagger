@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	istiov1alpha3 "github.com/weaveworks/flagger/pkg/apis/istio/v1alpha3"
+	istiov1alpha3 "github.com/fluxcd/flagger/pkg/apis/istio/v1alpha3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -314,6 +314,8 @@ const (
 	EventHook HookType = "event"
 	// RollbackHook rollback canary analysis if webhook returns HTTP 200
 	RollbackHook HookType = "rollback"
+	// ConfirmTrafficIncreaseHook increases traffic weight if webhook returns HTTP 200
+	ConfirmTrafficIncreaseHook = "confirm-traffic-increase"
 )
 
 // CanaryWebhook holds the reference to external checks used for canary analysis

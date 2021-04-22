@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/weaveworks/flagger/pkg/apis/projectcontour/v1"
+	v1 "github.com/fluxcd/flagger/pkg/apis/projectcontour/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
 
 // HTTPProxyLister helps list HTTPProxies.
+// All objects returned here must be treated as read-only.
 type HTTPProxyLister interface {
 	// List lists all HTTPProxies in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.HTTPProxy, err error)
 	// HTTPProxies returns an object that can list and get HTTPProxies.
 	HTTPProxies(namespace string) HTTPProxyNamespaceLister
@@ -58,10 +60,13 @@ func (s *hTTPProxyLister) HTTPProxies(namespace string) HTTPProxyNamespaceLister
 }
 
 // HTTPProxyNamespaceLister helps list and get HTTPProxies.
+// All objects returned here must be treated as read-only.
 type HTTPProxyNamespaceLister interface {
 	// List lists all HTTPProxies in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1.HTTPProxy, err error)
 	// Get retrieves the HTTPProxy from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1.HTTPProxy, error)
 	HTTPProxyNamespaceListerExpansion
 }

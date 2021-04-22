@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package canary
 
 import (
@@ -14,8 +30,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	clientset "github.com/weaveworks/flagger/pkg/client/clientset/versioned"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
 )
 
 // DeploymentController is managing the operations for Kubernetes Deployment kind
@@ -100,7 +116,7 @@ func (c *DeploymentController) Promote(cd *flaggerv1.Canary) error {
 	primaryCopy.Spec.Strategy = canary.Spec.Strategy
 
 	// update spec with primary secrets and config maps
-	primaryCopy.Spec.Template.Spec = c.configTracker.ApplyPrimaryConfigs(canary.Spec.Template.Spec, configRefs)
+	primaryCopy.Spec.Template.Spec = c.getPrimaryDeploymentTemplateSpec(canary, configRefs)
 
 	// update pod annotations to ensure a rolling update
 	annotations, err := makeAnnotations(canary.Spec.Template.Annotations)
@@ -273,7 +289,7 @@ func (c *DeploymentController) createPrimaryDeployment(cd *flaggerv1.Canary, inc
 						Annotations: annotations,
 					},
 					// update spec with the primary secrets and config maps
-					Spec: c.configTracker.ApplyPrimaryConfigs(canaryDep.Spec.Template.Spec, configRefs),
+					Spec: c.getPrimaryDeploymentTemplateSpec(canaryDep, configRefs),
 				},
 			},
 		}
@@ -435,4 +451,52 @@ func (c *DeploymentController) scale(cd *flaggerv1.Canary, replicas int32) error
 		return fmt.Errorf("scaling %s.%s to %v failed: %w", depCopy.GetName(), depCopy.Namespace, replicas, err)
 	}
 	return nil
+}
+
+func (c *DeploymentController) getPrimaryDeploymentTemplateSpec(canaryDep *appsv1.Deployment, refs map[string]ConfigRef) corev1.PodSpec {
+	spec := c.configTracker.ApplyPrimaryConfigs(canaryDep.Spec.Template.Spec, refs)
+
+	// update TopologySpreadConstraints
+	for _, topologySpreadConstraint := range spec.TopologySpreadConstraints {
+		c.appendPrimarySuffixToValuesIfNeeded(topologySpreadConstraint.LabelSelector, canaryDep)
+	}
+
+	// update affinity
+	if affinity := spec.Affinity; affinity != nil {
+		if podAntiAffinity := affinity.PodAntiAffinity; podAntiAffinity != nil {
+			for _, preferredAntiAffinity := range podAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
+				c.appendPrimarySuffixToValuesIfNeeded(preferredAntiAffinity.PodAffinityTerm.LabelSelector, canaryDep)
+			}
+
+			for _, requiredAntiAffinity := range podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
+				c.appendPrimarySuffixToValuesIfNeeded(requiredAntiAffinity.LabelSelector, canaryDep)
+			}
+		}
+	}
+
+	return spec
+}
+
+func (c *DeploymentController) appendPrimarySuffixToValuesIfNeeded(labelSelector *metav1.LabelSelector, canaryDep *appsv1.Deployment) {
+	if labelSelector != nil {
+		for _, matchExpression := range labelSelector.MatchExpressions {
+			if contains(c.labels, matchExpression.Key) {
+				for i := range matchExpression.Values {
+					if matchExpression.Values[i] == canaryDep.Name {
+						matchExpression.Values[i] += "-primary"
+						break
+					}
+				}
+			}
+		}
+	}
+}
+
+func contains(slice []string, val string) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }

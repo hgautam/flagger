@@ -1,8 +1,25 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package canary
 
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,7 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
 )
 
 func TestDeploymentController_Sync_ConsistentNaming(t *testing.T) {
@@ -96,6 +113,12 @@ func TestDeploymentController_Promote(t *testing.T) {
 	hpaPrimary, err := mocks.kubeClient.AutoscalingV2beta2().HorizontalPodAutoscalers("default").Get(context.TODO(), "podinfo-primary", metav1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, int32(2), hpaPrimary.Spec.MaxReplicas)
+
+	value := depPrimary.Spec.Template.Spec.Affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution[0].PodAffinityTerm.LabelSelector.MatchExpressions[0].Values[0]
+	assert.Equal(t, "podinfo-primary", value)
+
+	value = depPrimary.Spec.Template.Spec.Affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0].Values[0]
+	assert.Equal(t, "podinfo-primary", value)
 }
 
 func TestDeploymentController_ScaleToZero(t *testing.T) {
@@ -239,4 +262,35 @@ func TestDeploymentController_Finalize(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, int32(1), *c.Spec.Replicas)
 	}
+}
+
+func TestDeploymentController_AntiAffinityAndTopologySpreadConstraints(t *testing.T) {
+	t.Run("deployment", func(t *testing.T) {
+		dc := deploymentConfigs{name: "podinfo", label: "name", labelValue: "podinfo"}
+		mocks := newDeploymentFixture(dc)
+		mocks.initializeCanary(t)
+
+		depPrimary, err := mocks.kubeClient.AppsV1().Deployments("default").Get(context.TODO(), "podinfo-primary", metav1.GetOptions{})
+		require.NoError(t, err)
+
+		spec := depPrimary.Spec.Template.Spec
+
+		preferredConstraints := spec.Affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution
+		value := preferredConstraints[0].PodAffinityTerm.LabelSelector.MatchExpressions[0].Values[0]
+		assert.Equal(t, "podinfo-primary", value)
+		value = preferredConstraints[1].PodAffinityTerm.LabelSelector.MatchExpressions[0].Values[0]
+		assert.False(t, strings.HasSuffix(value, "-primary"))
+
+		requiredConstraints := spec.Affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution
+		value = requiredConstraints[0].LabelSelector.MatchExpressions[0].Values[0]
+		assert.Equal(t, "podinfo-primary", value)
+		value = requiredConstraints[1].LabelSelector.MatchExpressions[0].Values[0]
+		assert.False(t, strings.HasSuffix(value, "-primary"))
+
+		topologySpreadConstraints := spec.TopologySpreadConstraints
+		value = topologySpreadConstraints[0].LabelSelector.MatchExpressions[0].Values[0]
+		assert.Equal(t, "podinfo-primary", value)
+		value = topologySpreadConstraints[1].LabelSelector.MatchExpressions[0].Values[0]
+		assert.False(t, strings.HasSuffix(value, "-primary"))
+	})
 }

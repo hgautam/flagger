@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta1"
+	v1beta1 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
 
 // VirtualNodeLister helps list VirtualNodes.
+// All objects returned here must be treated as read-only.
 type VirtualNodeLister interface {
 	// List lists all VirtualNodes in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.VirtualNode, err error)
 	// VirtualNodes returns an object that can list and get VirtualNodes.
 	VirtualNodes(namespace string) VirtualNodeNamespaceLister
@@ -58,10 +60,13 @@ func (s *virtualNodeLister) VirtualNodes(namespace string) VirtualNodeNamespaceL
 }
 
 // VirtualNodeNamespaceLister helps list and get VirtualNodes.
+// All objects returned here must be treated as read-only.
 type VirtualNodeNamespaceLister interface {
 	// List lists all VirtualNodes in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.VirtualNode, err error)
 	// Get retrieves the VirtualNode from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1beta1.VirtualNode, error)
 	VirtualNodeNamespaceListerExpansion
 }

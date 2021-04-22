@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package main
 
 import (
@@ -9,7 +25,8 @@ import (
 	"strings"
 	"time"
 
-	semver "github.com/Masterminds/semver/v3"
+	"github.com/Masterminds/semver/v3"
+	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/uuid"
@@ -21,18 +38,19 @@ import (
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/transport"
 	_ "k8s.io/code-generator/cmd/client-gen/generators"
+	"k8s.io/klog/v2"
 
-	"github.com/weaveworks/flagger/pkg/canary"
-	clientset "github.com/weaveworks/flagger/pkg/client/clientset/versioned"
-	informers "github.com/weaveworks/flagger/pkg/client/informers/externalversions"
-	"github.com/weaveworks/flagger/pkg/controller"
-	"github.com/weaveworks/flagger/pkg/logger"
-	"github.com/weaveworks/flagger/pkg/metrics/observers"
-	"github.com/weaveworks/flagger/pkg/notifier"
-	"github.com/weaveworks/flagger/pkg/router"
-	"github.com/weaveworks/flagger/pkg/server"
-	"github.com/weaveworks/flagger/pkg/signals"
-	"github.com/weaveworks/flagger/pkg/version"
+	"github.com/fluxcd/flagger/pkg/canary"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
+	informers "github.com/fluxcd/flagger/pkg/client/informers/externalversions"
+	"github.com/fluxcd/flagger/pkg/controller"
+	"github.com/fluxcd/flagger/pkg/logger"
+	"github.com/fluxcd/flagger/pkg/metrics/observers"
+	"github.com/fluxcd/flagger/pkg/notifier"
+	"github.com/fluxcd/flagger/pkg/router"
+	"github.com/fluxcd/flagger/pkg/server"
+	"github.com/fluxcd/flagger/pkg/signals"
+	"github.com/fluxcd/flagger/pkg/version"
 )
 
 var (
@@ -96,6 +114,7 @@ func init() {
 }
 
 func main() {
+	klog.InitFlags(nil)
 	flag.Parse()
 
 	if ver {
@@ -110,6 +129,8 @@ func main() {
 	if zapReplaceGlobals {
 		zap.ReplaceGlobals(logger.Desugar())
 	}
+
+	klog.SetLogger(zapr.NewLogger(logger.Desugar()))
 
 	defer logger.Sync()
 

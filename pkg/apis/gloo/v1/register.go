@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/weaveworks/flagger/pkg/apis/gloo"
+	"github.com/fluxcd/flagger/pkg/apis/gloo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -28,8 +28,8 @@ var (
 // Adds the list of known types to Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&UpstreamGroup{},
-		&UpstreamGroupList{},
+		&RouteTable{},
+		&RouteTableList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

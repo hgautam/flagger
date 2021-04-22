@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
+	v1beta1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
 
 // AlertProviderLister helps list AlertProviders.
+// All objects returned here must be treated as read-only.
 type AlertProviderLister interface {
 	// List lists all AlertProviders in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.AlertProvider, err error)
 	// AlertProviders returns an object that can list and get AlertProviders.
 	AlertProviders(namespace string) AlertProviderNamespaceLister
@@ -58,10 +60,13 @@ func (s *alertProviderLister) AlertProviders(namespace string) AlertProviderName
 }
 
 // AlertProviderNamespaceLister helps list and get AlertProviders.
+// All objects returned here must be treated as read-only.
 type AlertProviderNamespaceLister interface {
 	// List lists all AlertProviders in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.AlertProvider, err error)
 	// Get retrieves the AlertProvider from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1beta1.AlertProvider, error)
 	AlertProviderNamespaceListerExpansion
 }

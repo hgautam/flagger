@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ limitations under the License.
 package scheme
 
 import (
-	appmeshv1beta1 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta1"
-	appmeshv1beta2 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta2"
-	flaggerv1beta1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	gloov1 "github.com/weaveworks/flagger/pkg/apis/gloo/v1"
-	networkingv1alpha3 "github.com/weaveworks/flagger/pkg/apis/istio/v1alpha3"
-	projectcontourv1 "github.com/weaveworks/flagger/pkg/apis/projectcontour/v1"
-	splitv1alpha1 "github.com/weaveworks/flagger/pkg/apis/smi/v1alpha1"
-	splitv1alpha2 "github.com/weaveworks/flagger/pkg/apis/smi/v1alpha2"
-	traefikv1alpha1 "github.com/weaveworks/flagger/pkg/apis/traefik/v1alpha1"
+	appmeshv1beta1 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta1"
+	appmeshv1beta2 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta2"
+	flaggerv1beta1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	gatewayv1 "github.com/fluxcd/flagger/pkg/apis/gloo/v1"
+	networkingv1alpha3 "github.com/fluxcd/flagger/pkg/apis/istio/v1alpha3"
+	projectcontourv1 "github.com/fluxcd/flagger/pkg/apis/projectcontour/v1"
+	splitv1alpha1 "github.com/fluxcd/flagger/pkg/apis/smi/v1alpha1"
+	splitv1alpha2 "github.com/fluxcd/flagger/pkg/apis/smi/v1alpha2"
+	traefikv1alpha1 "github.com/fluxcd/flagger/pkg/apis/traefik/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -42,7 +42,7 @@ var localSchemeBuilder = runtime.SchemeBuilder{
 	appmeshv1beta2.AddToScheme,
 	appmeshv1beta1.AddToScheme,
 	flaggerv1beta1.AddToScheme,
-	gloov1.AddToScheme,
+	gatewayv1.AddToScheme,
 	networkingv1alpha3.AddToScheme,
 	projectcontourv1.AddToScheme,
 	splitv1alpha1.AddToScheme,

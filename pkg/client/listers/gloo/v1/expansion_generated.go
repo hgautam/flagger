@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ limitations under the License.
 
 package v1
 
-// UpstreamGroupListerExpansion allows custom methods to be added to
-// UpstreamGroupLister.
-type UpstreamGroupListerExpansion interface{}
+// RouteTableListerExpansion allows custom methods to be added to
+// RouteTableLister.
+type RouteTableListerExpansion interface{}
 
-// UpstreamGroupNamespaceListerExpansion allows custom methods to be added to
-// UpstreamGroupNamespaceLister.
-type UpstreamGroupNamespaceListerExpansion interface{}
+// RouteTableNamespaceListerExpansion allows custom methods to be added to
+// RouteTableNamespaceLister.
+type RouteTableNamespaceListerExpansion interface{}

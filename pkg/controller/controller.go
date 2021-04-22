@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package controller
 
 import (
@@ -18,15 +34,15 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	"github.com/weaveworks/flagger/pkg/canary"
-	clientset "github.com/weaveworks/flagger/pkg/client/clientset/versioned"
-	flaggerscheme "github.com/weaveworks/flagger/pkg/client/clientset/versioned/scheme"
-	flaggerinformers "github.com/weaveworks/flagger/pkg/client/informers/externalversions/flagger/v1beta1"
-	"github.com/weaveworks/flagger/pkg/metrics"
-	"github.com/weaveworks/flagger/pkg/metrics/observers"
-	"github.com/weaveworks/flagger/pkg/notifier"
-	"github.com/weaveworks/flagger/pkg/router"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	"github.com/fluxcd/flagger/pkg/canary"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
+	flaggerscheme "github.com/fluxcd/flagger/pkg/client/clientset/versioned/scheme"
+	flaggerinformers "github.com/fluxcd/flagger/pkg/client/informers/externalversions/flagger/v1beta1"
+	"github.com/fluxcd/flagger/pkg/metrics"
+	"github.com/fluxcd/flagger/pkg/metrics/observers"
+	"github.com/fluxcd/flagger/pkg/notifier"
+	"github.com/fluxcd/flagger/pkg/router"
 )
 
 const controllerAgentName = "flagger"

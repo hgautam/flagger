@@ -62,7 +62,7 @@ helm repo add eks https://aws.github.io/eks-charts
 
 ## Enable horizontal pod auto-scaling
 
-Install the Horizontal Pod Autoscaler \(HPA\) metrics provider:
+Install the Horizontal Pod Autoscaler (HPA) metrics provider:
 
 ```bash
 helm upgrade -i metrics-server stable/metrics-server \
@@ -118,7 +118,7 @@ helm repo add flagger https://flagger.app
 Install Flagger's Canary CRD:
 
 ```yaml
-kubectl apply -f https://raw.githubusercontent.com/weaveworks/flagger/master/artifacts/flagger/crd.yaml
+kubectl apply -f https://raw.githubusercontent.com/fluxcd/flagger/main/artifacts/flagger/crd.yaml
 ```
 
 Deploy Flagger in the _**appmesh-system**_ namespace:
@@ -146,6 +146,6 @@ You can access Grafana using port forwarding:
 kubectl -n appmesh-system port-forward svc/appmesh-grafana 3000:3000
 ```
 
-Now that you have Flagger running,
-you can try the [App Mesh canary deployments tutorial](https://docs.flagger.app/usage/appmesh-progressive-delivery).
+Now that you have Flagger running, you can try the
+[App Mesh canary deployments tutorial](https://docs.flagger.app/usage/appmesh-progressive-delivery).
 

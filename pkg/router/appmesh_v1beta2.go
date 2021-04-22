@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package router
 
 import (
@@ -15,9 +31,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 
-	appmeshv1 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta2"
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	clientset "github.com/weaveworks/flagger/pkg/client/clientset/versioned"
+	appmeshv1 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta2"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
 )
 
 // AppMeshRouter is managing AppMesh virtual services
@@ -103,24 +119,22 @@ func (ar *AppMeshv1beta2Router) reconcileVirtualNode(canary *flaggerv1.Canary, n
 	}
 
 	backends := make([]appmeshv1.Backend, 0)
-	for _, b := range canary.Spec.Service.Backends {
-		var bk appmeshv1.Backend
-		if strings.HasPrefix(b, "arn:aws") {
-			bk = appmeshv1.Backend{
+	for i := range canary.Spec.Service.Backends {
+		if strings.HasPrefix(canary.Spec.Service.Backends[i], "arn:aws") {
+			backends = append(backends, appmeshv1.Backend{
 				VirtualService: appmeshv1.VirtualServiceBackend{
-					VirtualServiceARN: &b,
+					VirtualServiceARN: &canary.Spec.Service.Backends[i],
 				},
-			}
+			})
 		} else {
-			bk = appmeshv1.Backend{
+			backends = append(backends, appmeshv1.Backend{
 				VirtualService: appmeshv1.VirtualServiceBackend{
 					VirtualServiceRef: &appmeshv1.VirtualServiceReference{
-						Name: b,
+						Name: canary.Spec.Service.Backends[i],
 					},
 				},
-			}
+			})
 		}
-		backends = append(backends, bk)
 	}
 
 	if len(backends) > 0 {

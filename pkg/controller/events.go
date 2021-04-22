@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package controller
 
 import (
@@ -9,8 +25,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	"github.com/weaveworks/flagger/pkg/notifier"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	"github.com/fluxcd/flagger/pkg/notifier"
 )
 
 func (c *Controller) recordEventInfof(r *flaggerv1.Canary, template string, args ...interface{}) {
@@ -36,7 +52,7 @@ func (c *Controller) sendEventToWebhook(r *flaggerv1.Canary, eventType, template
 	for _, canaryWebhook := range r.GetAnalysis().Webhooks {
 		if canaryWebhook.Type == flaggerv1.EventHook {
 			webhookOverride = true
-			err := CallEventWebhook(r, canaryWebhook.URL, fmt.Sprintf(template, args...), eventType)
+			err := CallEventWebhook(r, canaryWebhook, fmt.Sprintf(template, args...), eventType)
 			if err != nil {
 				c.logger.With("canary", fmt.Sprintf("%s.%s", r.Name, r.Namespace)).Errorf("error sending event to webhook: %s", err)
 			}
@@ -44,7 +60,11 @@ func (c *Controller) sendEventToWebhook(r *flaggerv1.Canary, eventType, template
 	}
 
 	if c.eventWebhook != "" && !webhookOverride {
-		err := CallEventWebhook(r, c.eventWebhook, fmt.Sprintf(template, args...), eventType)
+		hook := flaggerv1.CanaryWebhook{
+			Name: "events",
+			URL:  c.eventWebhook,
+		}
+		err := CallEventWebhook(r, hook, fmt.Sprintf(template, args...), eventType)
 		if err != nil {
 			c.logger.With("canary", fmt.Sprintf("%s.%s", r.Name, r.Namespace)).Errorf("error sending event to webhook: %s", err)
 		}

@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ limitations under the License.
 package v1beta2
 
 import (
-	v1beta2 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta2"
+	v1beta2 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
 
 // VirtualRouterLister helps list VirtualRouters.
+// All objects returned here must be treated as read-only.
 type VirtualRouterLister interface {
 	// List lists all VirtualRouters in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta2.VirtualRouter, err error)
 	// VirtualRouters returns an object that can list and get VirtualRouters.
 	VirtualRouters(namespace string) VirtualRouterNamespaceLister
@@ -58,10 +60,13 @@ func (s *virtualRouterLister) VirtualRouters(namespace string) VirtualRouterName
 }
 
 // VirtualRouterNamespaceLister helps list and get VirtualRouters.
+// All objects returned here must be treated as read-only.
 type VirtualRouterNamespaceLister interface {
 	// List lists all VirtualRouters in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta2.VirtualRouter, err error)
 	// Get retrieves the VirtualRouter from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1beta2.VirtualRouter, error)
 	VirtualRouterNamespaceListerExpansion
 }

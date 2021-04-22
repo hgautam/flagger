@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha3
 
 import (
-	v1alpha3 "github.com/weaveworks/flagger/pkg/apis/istio/v1alpha3"
-	"github.com/weaveworks/flagger/pkg/client/clientset/versioned/scheme"
+	v1alpha3 "github.com/fluxcd/flagger/pkg/apis/istio/v1alpha3"
+	"github.com/fluxcd/flagger/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

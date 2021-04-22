@@ -1,23 +1,26 @@
 # Canary analysis with Prometheus Operator
 
-This guide show you how to use Prometheus Operator for canary analysis.
+This guide show you how to use
+[Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator) for canary analysis.
 
 ## Prerequisites
+
+Flagger requires a Kubernetes cluster **v1.16** or newer and Prometheus Operator **v0.40** or newer.
 
 Install Prometheus Operator with Helm v3:
 
 ```bash
-helm repo add stable https://kubernetes-charts.storage.googleapis.com
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
 kubectl create ns monitoring
-helm upgrade -i prometheus stable/prometheus-operator \
+helm upgrade -i prometheus prometheus-community/kube-prometheus-stack \
 --namespace monitoring \
 --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
 --set fullnameOverride=prometheus
 ```
 
 The `prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false`
-option allows Prometheus operator to watch serviceMonitors outside of his namespace.
+option allows Prometheus Operator to watch serviceMonitors outside of its namespace.
 
 Install Flagger by setting the metrics server to Prometheus:
 
@@ -38,7 +41,7 @@ helm upgrade -i loadtester flagger/loadtester \
 --namespace flagger-system
 ```
 
-Install podinfo demo app:
+Install [podinfo](https://github.com/stefanprodan/podinfo) demo app:
 
 ```bash
 helm repo add podinfo https://stefanprodan.github.io/podinfo
@@ -51,23 +54,8 @@ helm upgrade -i podinfo podinfo/podinfo \
 
 ## Service monitors
 
-The demo app is instrumented with Prometheus so you can create service monitors to scrape podinfo's metrics endpoint:
-
-```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: podinfo-primary
-  namespace: test
-spec:
-  endpoints:
-  - path: /metrics
-    port: http
-    interval: 5s
-  selector:
-    matchLabels:
-      app: podinfo
-```
+The demo app is instrumented with Prometheus,
+so you can create a `ServiceMonitor` objects to scrape podinfo's metrics endpoint:
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -83,10 +71,24 @@ spec:
   selector:
     matchLabels:
       app: podinfo-canary
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: podinfo-primary
+  namespace: test
+spec:
+  endpoints:
+    - path: /metrics
+      port: http
+      interval: 5s
+  selector:
+    matchLabels:
+      app: podinfo
 ```
 
 We are setting `interval: 5s` to have a more aggressive scraping.
-If you do not define it, you must to use a longer interval in the Canary object.
+If you do not define it, you should use a longer interval in the Canary object.
 
 ## Metric templates
 
@@ -191,7 +193,7 @@ spec:
           cmd: "hey -z 1m -q 10 -c 2 http://podinfo-canary.test/"
 ```
 
-Based on the above specification, Flagger creates the primary and canary Kubernetes ClusterIP service. 
+Based on the above specification, Flagger creates the primary and canary Kubernetes ClusterIP service.
 
-During the canary analysis, Prometheus will scrape the canary service and Flagger will use the HTTP error rate and 
-latency queries to determine if the release should be promoted or rolled back.
+During the canary analysis, Prometheus will scrape the canary service and Flagger will use the HTTP error rate
+and latency queries to determine if the release should be promoted or rolled back.

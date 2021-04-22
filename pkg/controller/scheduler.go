@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package controller
 
 import (
@@ -9,9 +25,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	"github.com/weaveworks/flagger/pkg/canary"
-	"github.com/weaveworks/flagger/pkg/router"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	"github.com/fluxcd/flagger/pkg/canary"
+	"github.com/fluxcd/flagger/pkg/router"
 )
 
 func (c *Controller) min(a int, b int) int {
@@ -294,7 +310,8 @@ func (c *Controller) advanceCanary(name string, namespace string) {
 
 	// check if we should rollback
 	if cd.Status.Phase == flaggerv1.CanaryPhaseProgressing ||
-		cd.Status.Phase == flaggerv1.CanaryPhaseWaiting {
+		cd.Status.Phase == flaggerv1.CanaryPhaseWaiting ||
+		cd.Status.Phase == flaggerv1.CanaryWaitingPromotion {
 		if ok := c.runRollbackHooks(cd, cd.Status.Phase); ok {
 			c.recordEventWarningf(cd, "Rolling back %s.%s manual webhook invoked", cd.Name, cd.Namespace)
 			c.alert(cd, "Rolling back manual webhook invoked", false, flaggerv1.SeverityWarn)
@@ -396,6 +413,12 @@ func (c *Controller) advanceCanary(name string, namespace string) {
 
 	// strategy: Canary progressive traffic increase
 	if c.nextStepWeight(cd, canaryWeight) > 0 {
+		// run hook only if traffic is not mirrored
+		if !mirrored {
+			if promote := c.runConfirmTrafficIncreaseHooks(cd); !promote {
+				return
+			}
+		}
 		c.runCanary(cd, canaryController, meshRouter, mirrored, canaryWeight, primaryWeight, maxWeight)
 	}
 
@@ -512,7 +535,7 @@ func (c *Controller) runCanary(canary *flaggerv1.Canary, canaryController canary
 	// promote canary - max weight reached
 	if canaryWeight >= maxWeight {
 		// check promotion gate
-		if promote := c.runConfirmPromotionHooks(canary); !promote {
+		if promote := c.runConfirmPromotionHooks(canary, canaryController); !promote {
 			return
 		}
 
@@ -554,7 +577,7 @@ func (c *Controller) runAB(canary *flaggerv1.Canary, canaryController canary.Con
 	}
 
 	// check promotion gate
-	if promote := c.runConfirmPromotionHooks(canary); !promote {
+	if promote := c.runConfirmPromotionHooks(canary, canaryController); !promote {
 		return
 	}
 
@@ -600,7 +623,7 @@ func (c *Controller) runBlueGreen(canary *flaggerv1.Canary, canaryController can
 	}
 
 	// check promotion gate
-	if promote := c.runConfirmPromotionHooks(canary); !promote {
+	if promote := c.runConfirmPromotionHooks(canary, canaryController); !promote {
 		return
 	}
 
@@ -729,6 +752,7 @@ func (c *Controller) shouldAdvance(canary *flaggerv1.Canary, canaryController ca
 		canary.Status.Phase == flaggerv1.CanaryPhaseInitializing ||
 		canary.Status.Phase == flaggerv1.CanaryPhaseProgressing ||
 		canary.Status.Phase == flaggerv1.CanaryPhaseWaiting ||
+		canary.Status.Phase == flaggerv1.CanaryWaitingPromotion ||
 		canary.Status.Phase == flaggerv1.CanaryPhasePromoting ||
 		canary.Status.Phase == flaggerv1.CanaryPhaseFinalising {
 		return true, nil
@@ -754,6 +778,7 @@ func (c *Controller) shouldAdvance(canary *flaggerv1.Canary, canaryController ca
 func (c *Controller) checkCanaryStatus(canary *flaggerv1.Canary, canaryController canary.Controller, shouldAdvance bool) bool {
 	c.recorder.SetStatus(canary, canary.Status.Phase)
 	if canary.Status.Phase == flaggerv1.CanaryPhaseProgressing ||
+		canary.Status.Phase == flaggerv1.CanaryWaitingPromotion ||
 		canary.Status.Phase == flaggerv1.CanaryPhasePromoting ||
 		canary.Status.Phase == flaggerv1.CanaryPhaseFinalising {
 		return true
@@ -800,7 +825,8 @@ func (c *Controller) checkCanaryStatus(canary *flaggerv1.Canary, canaryControlle
 }
 
 func (c *Controller) hasCanaryRevisionChanged(canary *flaggerv1.Canary, canaryController canary.Controller) bool {
-	if canary.Status.Phase == flaggerv1.CanaryPhaseProgressing {
+	if canary.Status.Phase == flaggerv1.CanaryPhaseProgressing ||
+		canary.Status.Phase == flaggerv1.CanaryWaitingPromotion {
 		if diff, _ := canaryController.HasTargetChanged(canary); diff {
 			return true
 		}

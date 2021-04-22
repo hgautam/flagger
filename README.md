@@ -1,21 +1,25 @@
 # flagger
 
-[![build](https://img.shields.io/circleci/build/github/weaveworks/flagger/master.svg)](https://circleci.com/gh/weaveworks/flagger)
-[![report](https://goreportcard.com/badge/github.com/weaveworks/flagger)](https://goreportcard.com/report/github.com/weaveworks/flagger)
-[![codecov](https://codecov.io/gh/weaveworks/flagger/branch/master/graph/badge.svg)](https://codecov.io/gh/weaveworks/flagger)
-[![license](https://img.shields.io/github/license/weaveworks/flagger.svg)](https://github.com/weaveworks/flagger/blob/master/LICENSE)
-[![release](https://img.shields.io/github/release/weaveworks/flagger/all.svg)](https://github.com/weaveworks/flagger/releases)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4783/badge)](https://bestpractices.coreinfrastructure.org/projects/4783)
+[![build](https://github.com/fluxcd/flagger/workflows/build/badge.svg)](https://github.com/fluxcd/flagger/actions)
+[![report](https://goreportcard.com/badge/github.com/fluxcd/flagger)](https://goreportcard.com/report/github.com/fluxcd/flagger)
+[![license](https://img.shields.io/github/license/fluxcd/flagger.svg)](https://github.com/fluxcd/flagger/blob/main/LICENSE)
+[![release](https://img.shields.io/github/release/fluxcd/flagger/all.svg)](https://github.com/fluxcd/flagger/releases)
 
 Flagger is a progressive delivery tool that automates the release process for applications running on Kubernetes. 
 It reduces the risk of introducing a new software version in production
 by gradually shifting traffic to the new version while measuring metrics and running conformance tests.
 
-![flagger-overview](https://raw.githubusercontent.com/weaveworks/flagger/master/docs/diagrams/flagger-canary-overview.png)
+![flagger-overview](https://raw.githubusercontent.com/fluxcd/flagger/main/docs/diagrams/flagger-overview.png)
 
 Flagger implements several deployment strategies (Canary releases, A/B testing, Blue/Green mirroring)
-using a service mesh (App Mesh, Istio, Linkerd) or an ingress controller (Contour, Gloo, NGINX, Skipper, Traefik) for traffic routing.
-For release analysis, Flagger can query Prometheus, Datadog or CloudWatch
+using a service mesh (App Mesh, Istio, Linkerd)
+or an ingress controller (Contour, Gloo, NGINX, Skipper, Traefik) for traffic routing.
+For release analysis, Flagger can query Prometheus, Datadog, New Relic or CloudWatch
 and for alerting it uses Slack, MS Teams, Discord and Rocket.
+
+Flagger is a [Cloud Native Computing Foundation](https://cncf.io/) project
+and part of [Flux](https://fluxcd.io) family of GitOps tools.
 
 ### Documentation
 
@@ -52,6 +56,9 @@ List of organizations using Flagger:
 * [Weaveworks](https://weave.works)
 * [Jumia Group](https://group.jumia.com)
 * [eLife](https://elifesciences.org/)
+* [Trendhim](https://www.trendhim.com)
+* [Sinch](https://www.sinch.com)
+* [OfferUp](https://www.offerup.com)
 
 If you are using Flagger, please submit a PR to add your organization to the list!
 
@@ -202,7 +209,7 @@ For more details on how the canary analysis and promotion works please [read the
 | Feature                                    | Contour            | Gloo               | NGINX              | Skipper            | Traefik            |
 | ------------------------------------------ | ------------------ | ------------------ | ------------------ | ------------------ | ------------------ |
 | Canary deployments (weighted traffic)      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| A/B testing (headers and cookies routing)  | :heavy_check_mark: | :heavy_minus_sign: | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: |
+| A/B testing (headers and cookies routing)  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: |
 | Blue/Green deployments (traffic switch)    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Webhooks (acceptance/load testing)         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Manual gating (approve/pause/resume)       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
@@ -212,12 +219,11 @@ For more details on how the canary analysis and promotion works please [read the
 
 ### Roadmap
 
-#### [GitOps Toolkit](https://github.com/fluxcd/toolkit) compatibility
+#### [GitOps Toolkit](https://github.com/fluxcd/flux2) compatibility
 
 * Migrate Flagger to Kubernetes controller-runtime and [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder)
 * Make the Canary status compatible with [kstatus](https://github.com/kubernetes-sigs/cli-utils)
 * Make Flagger emit Kubernetes events compatible with Flux v2 notification API
-* Migrate CI to GitHub Actions and publish AMD64, ARM64 and ARMv7 container images
 * Integrate Flagger into Flux v2 as the progressive delivery component
 
 #### Integrations
@@ -245,10 +251,10 @@ When submitting bug reports please include as much details as possible:
 If you have any questions about Flagger and progressive delivery:
 
 * Read the Flagger [docs](https://docs.flagger.app).
-* Invite yourself to the [Weave community slack](https://slack.weave.works/)
-  and join the [#flagger](https://weave-community.slack.com/messages/flagger/) channel.
-* Join the [Weave User Group](https://www.meetup.com/pro/Weave/) and get invited to online talks,
-  hands-on training and meetups in your area.
-* File an [issue](https://github.com/weaveworks/flagger/issues/new).
+* Invite yourself to the [CNCF community slack](https://slack.cncf.io/)
+  and join the [#flagger](https://cloud-native.slack.com/messages/flagger/) channel.
+* Check out the [Flux talks section](https://fluxcd.io/community/#talks) and to see a list of online talks,
+  hands-on training and meetups.
+* File an [issue](https://github.com/fluxcd/flagger/issues/new).
 
 Your feedback is always welcome!

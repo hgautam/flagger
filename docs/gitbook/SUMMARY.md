@@ -8,6 +8,7 @@
 * [Flagger Install on Kubernetes](install/flagger-install-on-kubernetes.md)
 * [Flagger Install on GKE Istio](install/flagger-install-on-google-cloud.md)
 * [Flagger Install on EKS App Mesh](install/flagger-install-on-eks-appmesh.md)
+* [Flagger Install on Alibaba ServiceMesh](install/flagger-install-on-alibaba-servicemesh.md)
 
 ## Usage
 
@@ -30,14 +31,12 @@
 * [Skipper Canary Deployments](tutorials/skipper-progressive-delivery.md)
 * [Traefik Canary Deployments](tutorials/traefik-progressive-delivery.md)
 * [Blue/Green Deployments](tutorials/kubernetes-blue-green.md)
-* [Crossover Canary Deployments](tutorials/crossover-progressive-delivery.md)
 * [Canary analysis with Prometheus Operator](tutorials/prometheus-operator.md)
-* [Canaries with Helm charts and GitOps](tutorials/canary-helm-gitops.md)
 * [Zero downtime deployments](tutorials/zero-downtime-deployments.md)
-* [Rollout Weights](tutorials/rollout-weights.md)
 
 ## Dev
 
 * [Development Guide](dev/dev-guide.md)
 * [Release Guide](dev/release-guide.md)
 * [Upgrade Guide](dev/upgrade-guide.md)
+

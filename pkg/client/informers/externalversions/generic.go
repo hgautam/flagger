@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ package externalversions
 import (
 	"fmt"
 
-	v1beta1 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta1"
-	v1beta2 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta2"
-	flaggerv1beta1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	v1 "github.com/weaveworks/flagger/pkg/apis/gloo/v1"
-	v1alpha3 "github.com/weaveworks/flagger/pkg/apis/istio/v1alpha3"
-	projectcontourv1 "github.com/weaveworks/flagger/pkg/apis/projectcontour/v1"
-	v1alpha1 "github.com/weaveworks/flagger/pkg/apis/smi/v1alpha1"
-	v1alpha2 "github.com/weaveworks/flagger/pkg/apis/smi/v1alpha2"
-	traefikv1alpha1 "github.com/weaveworks/flagger/pkg/apis/traefik/v1alpha1"
+	v1beta1 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta1"
+	v1beta2 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta2"
+	flaggerv1beta1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	v1 "github.com/fluxcd/flagger/pkg/apis/gloo/v1"
+	v1alpha3 "github.com/fluxcd/flagger/pkg/apis/istio/v1alpha3"
+	projectcontourv1 "github.com/fluxcd/flagger/pkg/apis/projectcontour/v1"
+	v1alpha1 "github.com/fluxcd/flagger/pkg/apis/smi/v1alpha1"
+	v1alpha2 "github.com/fluxcd/flagger/pkg/apis/smi/v1alpha2"
+	traefikv1alpha1 "github.com/fluxcd/flagger/pkg/apis/traefik/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -84,9 +84,9 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	case flaggerv1beta1.SchemeGroupVersion.WithResource("metrictemplates"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Flagger().V1beta1().MetricTemplates().Informer()}, nil
 
-		// Group=gloo.solo.io, Version=v1
-	case v1.SchemeGroupVersion.WithResource("upstreamgroups"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Gloo().V1().UpstreamGroups().Informer()}, nil
+		// Group=gateway.solo.io, Version=v1
+	case v1.SchemeGroupVersion.WithResource("routetables"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Gateway().V1().RouteTables().Informer()}, nil
 
 		// Group=networking.istio.io, Version=v1alpha3
 	case v1alpha3.SchemeGroupVersion.WithResource("destinationrules"):

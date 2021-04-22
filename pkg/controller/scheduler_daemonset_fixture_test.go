@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package controller
 
 import (
@@ -14,18 +30,18 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	istiov1alpha1 "github.com/weaveworks/flagger/pkg/apis/istio/common/v1alpha1"
-	istiov1alpha3 "github.com/weaveworks/flagger/pkg/apis/istio/v1alpha3"
-	"github.com/weaveworks/flagger/pkg/canary"
-	clientset "github.com/weaveworks/flagger/pkg/client/clientset/versioned"
-	fakeFlagger "github.com/weaveworks/flagger/pkg/client/clientset/versioned/fake"
-	informers "github.com/weaveworks/flagger/pkg/client/informers/externalversions"
-	"github.com/weaveworks/flagger/pkg/logger"
-	"github.com/weaveworks/flagger/pkg/metrics"
-	"github.com/weaveworks/flagger/pkg/metrics/observers"
-	"github.com/weaveworks/flagger/pkg/notifier"
-	"github.com/weaveworks/flagger/pkg/router"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	istiov1alpha1 "github.com/fluxcd/flagger/pkg/apis/istio/common/v1alpha1"
+	istiov1alpha3 "github.com/fluxcd/flagger/pkg/apis/istio/v1alpha3"
+	"github.com/fluxcd/flagger/pkg/canary"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
+	fakeFlagger "github.com/fluxcd/flagger/pkg/client/clientset/versioned/fake"
+	informers "github.com/fluxcd/flagger/pkg/client/informers/externalversions"
+	"github.com/fluxcd/flagger/pkg/logger"
+	"github.com/fluxcd/flagger/pkg/metrics"
+	"github.com/fluxcd/flagger/pkg/metrics/observers"
+	"github.com/fluxcd/flagger/pkg/notifier"
+	"github.com/fluxcd/flagger/pkg/router"
 )
 
 type daemonSetFixture struct {

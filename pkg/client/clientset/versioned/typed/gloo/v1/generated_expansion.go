@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,4 +18,4 @@ limitations under the License.
 
 package v1
 
-type UpstreamGroupExpansion interface{}
+type RouteTableExpansion interface{}

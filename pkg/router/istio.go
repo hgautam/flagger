@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package router
 
 import (
@@ -13,9 +29,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	istiov1alpha3 "github.com/weaveworks/flagger/pkg/apis/istio/v1alpha3"
-	clientset "github.com/weaveworks/flagger/pkg/client/clientset/versioned"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	istiov1alpha3 "github.com/fluxcd/flagger/pkg/apis/istio/v1alpha3"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
 )
 
 // IstioRouter is managing Istio virtual services
@@ -424,15 +440,26 @@ func (ir *IstioRouter) Finalize(canary *flaggerv1.Canary) error {
 
 // mergeMatchConditions appends the URI match rules to canary conditions
 func mergeMatchConditions(canary, defaults []istiov1alpha3.HTTPMatchRequest) []istiov1alpha3.HTTPMatchRequest {
-	for i := range canary {
+	if len(defaults) == 0 {
+		return canary
+	}
+
+	merged := make([]istiov1alpha3.HTTPMatchRequest, len(canary)*len(defaults))
+	num := 0
+	for _, c := range canary {
 		for _, d := range defaults {
-			if d.Uri != nil {
-				canary[i].Uri = d.Uri
+			merged[num] = *d.DeepCopy()
+			if c.Headers != nil {
+				merged[num].Headers = c.Headers
 			}
+			if c.SourceLabels != nil {
+				merged[num].SourceLabels = c.SourceLabels
+			}
+			num++
 		}
 	}
 
-	return canary
+	return merged
 }
 
 // makeDestination returns a an destination weight for the specified host

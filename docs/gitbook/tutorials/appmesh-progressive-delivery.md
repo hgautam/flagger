@@ -1,13 +1,14 @@
 # App Mesh Canary Deployments
 
 This guide shows you how to use App Mesh and Flagger to automate canary deployments.
-You'll need an EKS cluster configured with App Mesh,
-you can find the installion guide [here](https://docs.flagger.app/install/flagger-install-on-eks-appmesh).
+You'll need an EKS cluster (Kubernetes >= 1.16) configured with App Mesh,
+you can find the installation guide [here](https://docs.flagger.app/install/flagger-install-on-eks-appmesh).
 
 ## Bootstrap
 
-Flagger takes a Kubernetes deployment and optionally a horizontal pod autoscaler \(HPA\),
-then creates a series of objects \(Kubernetes deployments, ClusterIP services, App Mesh virtual nodes and services\).
+Flagger takes a Kubernetes deployment and optionally a horizontal pod autoscaler (HPA),
+then creates a series of objects (Kubernetes deployments, ClusterIP services,
+App Mesh virtual nodes and services).
 These objects expose the application on the mesh and drive the canary analysis and promotion.
 The only App Mesh object you need to create by yourself is the mesh resource.
 
@@ -42,7 +43,7 @@ EOF
 Create a deployment and a horizontal pod autoscaler:
 
 ```bash
-kubectl apply -k github.com/weaveworks/flagger//kustomize/podinfo
+kubectl apply -k https://github.com/fluxcd/flagger//kustomize/podinfo?ref=main
 ```
 
 Deploy the load testing service to generate traffic during the canary analysis:
@@ -167,13 +168,13 @@ virtualservice.appmesh.k8s.aws/podinfo
 virtualservice.appmesh.k8s.aws/podinfo-canary
 ```
 
-After the boostrap, the podinfo deployment will be scaled to zero and the traffic to
-`podinfo.test` will be routed to the primary pods.
+After the boostrap, the podinfo deployment will be scaled to zero and the traffic to `podinfo.test`
+will be routed to the primary pods.
 During the canary analysis, the `podinfo-canary.test` address can be used to target directly the canary pods.
 
 App Mesh blocks all egress traffic by default.
-If your application needs to call another service, you have to
-create an App Mesh virtual service for it and add the virtual service name to the backend list.
+If your application needs to call another service, you have to create an App Mesh virtual service for it
+and add the virtual service name to the backend list.
 
 ```yaml
   service:
@@ -234,7 +235,7 @@ Open your browser and navigate to the ingress address to access podinfo UI.
 
 A canary deployment is triggered by changes in any of the following objects:
 
-* Deployment PodSpec \(container image, command, ports, env, resources, etc\)
+* Deployment PodSpec (container image, command, ports, env, resources, etc)
 * ConfigMaps and Secrets mounted as volumes or mapped to environment variables
 
 Trigger a canary deployment by updating the container image:
@@ -281,7 +282,7 @@ During the analysis the canary’s progress can be monitored with Grafana.
 The App Mesh dashboard URL is
 [http://localhost:3000/d/flagger-appmesh/appmesh-canary?refresh=10s&orgId=1&var-namespace=test&var-primary=podinfo-primary&var-canary=podinfo](http://localhost:3000/d/flagger-appmesh/appmesh-canary?refresh=10s&orgId=1&var-namespace=test&var-primary=podinfo-primary&var-canary=podinfo).
 
-![App Mesh Canary Dashboard](https://raw.githubusercontent.com/weaveworks/flagger/master/docs/screens/flagger-grafana-appmesh.png)
+![App Mesh Canary Dashboard](https://raw.githubusercontent.com/fluxcd/flagger/main/docs/screens/flagger-grafana-appmesh.png)
 
 You can monitor all canaries with:
 
@@ -296,7 +297,7 @@ prod        backend   Failed        0
 
 If you’ve enabled the Slack notifications, you should receive the following messages:
 
-![Flagger Slack Notifications](https://raw.githubusercontent.com/weaveworks/flagger/master/docs/screens/slack-canary-notifications.png)
+![Flagger Slack Notifications](https://raw.githubusercontent.com/fluxcd/flagger/main/docs/screens/slack-canary-notifications.png)
 
 ## Automated rollback
 
@@ -350,7 +351,7 @@ Canary failed! Scaling down podinfo.test
 If you’ve enabled the Slack notifications, you’ll receive a message if the progress deadline is exceeded,
 or if the analysis reached the maximum number of failed checks:
 
-![Flagger Slack Notifications](https://raw.githubusercontent.com/weaveworks/flagger/master/docs/screens/slack-canary-failed.png)
+![Flagger Slack Notifications](https://raw.githubusercontent.com/fluxcd/flagger/main/docs/screens/slack-canary-failed.png)
 
 ## A/B Testing
 
@@ -358,7 +359,7 @@ Besides weighted routing, Flagger can be configured to route traffic to the cana
 In an A/B testing scenario, you'll be using HTTP headers or cookies to target a certain segment of your users.
 This is particularly useful for frontend applications that require session affinity.
 
-![Flagger A/B Testing Stages](https://raw.githubusercontent.com/weaveworks/flagger/master/docs/diagrams/flagger-abtest-steps.png)
+![Flagger A/B Testing Stages](https://raw.githubusercontent.com/fluxcd/flagger/main/docs/diagrams/flagger-abtest-steps.png)
 
 Edit the canary analysis, remove the max/step weight and add the match conditions and iterations:
 
@@ -423,4 +424,8 @@ Routing all traffic to primary
 Promotion completed! Scaling down podinfo.test
 ```
 
-For an in-depth look at the analysis process read the [usage docs](../usage/how-it-works.md).
+The above procedure can be extended with
+[custom metrics](../usage/metrics.md) checks,
+[webhooks](../usage/webhooks.md),
+[manual promotion](../usage/webhooks.md#manual-gating) approval and
+[Slack or MS Teams](../usage/alerting.md) notifications.

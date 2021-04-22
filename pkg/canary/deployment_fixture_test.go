@@ -1,3 +1,19 @@
+/*
+Copyright 2020 The Flux authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package canary
 
 import (
@@ -15,10 +31,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
 
-	flaggerv1 "github.com/weaveworks/flagger/pkg/apis/flagger/v1beta1"
-	clientset "github.com/weaveworks/flagger/pkg/client/clientset/versioned"
-	fakeFlagger "github.com/weaveworks/flagger/pkg/client/clientset/versioned/fake"
-	"github.com/weaveworks/flagger/pkg/logger"
+	flaggerv1 "github.com/fluxcd/flagger/pkg/apis/flagger/v1beta1"
+	clientset "github.com/fluxcd/flagger/pkg/client/clientset/versioned"
+	fakeFlagger "github.com/fluxcd/flagger/pkg/client/clientset/versioned/fake"
+	"github.com/fluxcd/flagger/pkg/logger"
 )
 
 type deploymentControllerFixture struct {
@@ -62,6 +78,11 @@ func (d deploymentControllerFixture) initializeCanary(t *testing.T) {
 }
 
 func newDeploymentFixture(dc deploymentConfigs) deploymentControllerFixture {
+	fixture, _ := newCustomizableFixture(dc)
+	return fixture
+}
+
+func newCustomizableFixture(dc deploymentConfigs) (deploymentControllerFixture, *fake.Clientset) {
 	// init canary
 	cc := canaryConfigs{targetName: dc.name}
 	canary := newDeploymentControllerTestCanary(cc)
@@ -105,7 +126,7 @@ func newDeploymentFixture(dc deploymentConfigs) deploymentControllerFixture {
 		logger:        logger,
 		flaggerClient: flaggerClient,
 		kubeClient:    kubeClient,
-	}
+	}, kubeClient
 }
 
 func newDeploymentControllerTestConfigMap() *corev1.ConfigMap {
@@ -334,6 +355,7 @@ func newDeploymentControllerTestCanary(cc canaryConfigs) *flaggerv1.Canary {
 }
 
 func newDeploymentControllerTest(dc deploymentConfigs) *appsv1.Deployment {
+	var optional bool = false
 	d := &appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{APIVersion: appsv1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
@@ -457,6 +479,7 @@ func newDeploymentControllerTest(dc deploymentConfigs) *appsv1.Deployment {
 									LocalObjectReference: corev1.LocalObjectReference{
 										Name: "podinfo-config-vol",
 									},
+									Optional: &optional,
 								},
 							},
 						},
@@ -465,6 +488,7 @@ func newDeploymentControllerTest(dc deploymentConfigs) *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "podinfo-secret-vol",
+									Optional:   &optional,
 								},
 							},
 						},
@@ -536,6 +560,80 @@ func newDeploymentControllerTest(dc deploymentConfigs) *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "podinfo-secret-tracker-disabled",
+								},
+							},
+						},
+					},
+					Affinity: &corev1.Affinity{
+						PodAntiAffinity: &corev1.PodAntiAffinity{
+							PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
+								{
+									PodAffinityTerm: corev1.PodAffinityTerm{
+										LabelSelector: &metav1.LabelSelector{
+											MatchExpressions: []metav1.LabelSelectorRequirement{
+												{
+													Key:    "app",
+													Values: []string{"podinfo"},
+												},
+											},
+										},
+									},
+								},
+								{
+									PodAffinityTerm: corev1.PodAffinityTerm{
+										LabelSelector: &metav1.LabelSelector{
+											MatchExpressions: []metav1.LabelSelectorRequirement{
+												{
+													Key:    "app",
+													Values: []string{"arbitrary-app"},
+												},
+											},
+										},
+									},
+								},
+							},
+							RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+								{
+									LabelSelector: &metav1.LabelSelector{
+										MatchExpressions: []metav1.LabelSelectorRequirement{
+											{
+												Key:    "app",
+												Values: []string{"podinfo"},
+											},
+										},
+									},
+								},
+								{
+									LabelSelector: &metav1.LabelSelector{
+										MatchExpressions: []metav1.LabelSelectorRequirement{
+											{
+												Key:    "app",
+												Values: []string{"arbitrary-app"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
+						{
+							LabelSelector: &metav1.LabelSelector{
+								MatchExpressions: []metav1.LabelSelectorRequirement{
+									{
+										Key:    "app",
+										Values: []string{"podinfo"},
+									},
+								},
+							},
+						},
+						{
+							LabelSelector: &metav1.LabelSelector{
+								MatchExpressions: []metav1.LabelSelectorRequirement{
+									{
+										Key:    "app",
+										Values: []string{"arbitrary-app"},
+									},
 								},
 							},
 						},
@@ -737,6 +835,36 @@ func newDeploymentControllerTestV2() *appsv1.Deployment {
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
 									SecretName: "podinfo-secret-tracker-disabled",
+								},
+							},
+						},
+					},
+					Affinity: &corev1.Affinity{
+						PodAntiAffinity: &corev1.PodAntiAffinity{
+							PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
+								{
+									PodAffinityTerm: corev1.PodAffinityTerm{
+										LabelSelector: &metav1.LabelSelector{
+											MatchExpressions: []metav1.LabelSelectorRequirement{
+												{
+													Key:    "app",
+													Values: []string{"podinfo"},
+												},
+											},
+										},
+									},
+								},
+							},
+							RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+								{
+									LabelSelector: &metav1.LabelSelector{
+										MatchExpressions: []metav1.LabelSelectorRequirement{
+											{
+												Key:    "app",
+												Values: []string{"podinfo"},
+											},
+										},
+									},
 								},
 							},
 						},

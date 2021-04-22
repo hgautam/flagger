@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ limitations under the License.
 package traefik
 
 import (
-	internalinterfaces "github.com/weaveworks/flagger/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/weaveworks/flagger/pkg/client/informers/externalversions/traefik/v1alpha1"
+	internalinterfaces "github.com/fluxcd/flagger/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/fluxcd/flagger/pkg/client/informers/externalversions/traefik/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ limitations under the License.
 package v1alpha3
 
 import (
-	v1alpha3 "github.com/weaveworks/flagger/pkg/apis/istio/v1alpha3"
+	v1alpha3 "github.com/fluxcd/flagger/pkg/apis/istio/v1alpha3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
 
 // DestinationRuleLister helps list DestinationRules.
+// All objects returned here must be treated as read-only.
 type DestinationRuleLister interface {
 	// List lists all DestinationRules in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha3.DestinationRule, err error)
 	// DestinationRules returns an object that can list and get DestinationRules.
 	DestinationRules(namespace string) DestinationRuleNamespaceLister
@@ -58,10 +60,13 @@ func (s *destinationRuleLister) DestinationRules(namespace string) DestinationRu
 }
 
 // DestinationRuleNamespaceLister helps list and get DestinationRules.
+// All objects returned here must be treated as read-only.
 type DestinationRuleNamespaceLister interface {
 	// List lists all DestinationRules in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha3.DestinationRule, err error)
 	// Get retrieves the DestinationRule from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha3.DestinationRule, error)
 	DestinationRuleNamespaceListerExpansion
 }

@@ -1,18 +1,22 @@
 # Flagger
 
-[Flagger](https://github.com/weaveworks/flagger) is an operator that automates the release process of applications on Kubernetes. 
+[Flagger](https://github.com/fluxcd/flagger) is an operator that automates the release process of applications on Kubernetes.
 
 Flagger can run automated application analysis, testing, promotion and rollback for the following deployment strategies:
 * Canary Release (progressive traffic shifting)
 * A/B Testing (HTTP headers and cookies traffic routing)
 * Blue/Green (traffic switching and mirroring)
 
-Flagger works with service mesh solutions (Istio, Linkerd, AWS App Mesh) and with Kubernetes ingress controllers (NGINX, Skipper, Gloo, Contour, Traefik).
+Flagger works with service mesh solutions (Istio, Linkerd, AWS App Mesh) and with Kubernetes ingress controllers
+(NGINX, Skipper, Gloo, Contour, Traefik).
 Flagger can be configured to send alerts to various chat platforms such as Slack, Microsoft Teams, Discord and Rocket.
+
+Flagger is a [Cloud Native Computing Foundation](https://cncf.io/) project
+and part of [Flux](https://fluxcd.io) family of GitOps tools.
 
 ## Prerequisites
 
-* Kubernetes >= 1.14
+* Kubernetes >= 1.16
 
 ## Installing the Chart
 
@@ -25,7 +29,7 @@ $ helm repo add flagger https://flagger.app
 Install Flagger's custom resource definitions:
 
 ```console
-$ kubectl apply -f https://raw.githubusercontent.com/weaveworks/flagger/master/artifacts/flagger/crd.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/fluxcd/flagger/main/artifacts/flagger/crd.yaml
 ```
 
 To install Flagger for **Istio**:
@@ -37,13 +41,13 @@ $ helm upgrade -i flagger flagger/flagger \
     --set metricsServer=http://prometheus:9090
 ```
 
-To install Flagger for **Linkerd**:
+To install Flagger for **Linkerd** (requires Linkerd Viz extension):
 
 ```console
 $ helm upgrade -i flagger flagger/flagger \
     --namespace=linkerd \
     --set meshProvider=linkerd \
-    --set metricsServer=http://linkerd-prometheus:9090
+    --set metricsServer=http://prometheus.linkerd-viz:9090
 ```
 
 To install Flagger for **AWS App Mesh**:
@@ -87,7 +91,7 @@ To install Flagger and Prometheus for **Traefik**:
 
 ```console
 $ helm upgrade -i flagger flagger/flagger \
-    --namespace traefik \
+    --namespace=traefik \
     --set prometheus.install=true \
     --set meshProvider=traefik
 ```
@@ -110,7 +114,7 @@ The following tables lists the configurable parameters of the Flagger chart and 
 
 Parameter | Description | Default
 --- | --- | ---
-`image.repository` | Image repository | `weaveworks/flagger`
+`image.repository` | Image repository | `ghcr.io/fluxcd/flagger`
 `image.tag` | Image tag | `<VERSION>`
 `image.pullPolicy` | Image pull policy | `IfNotPresent`
 `logLevel` | Log level | `info`
@@ -125,8 +129,8 @@ Parameter | Description | Default
 `slack.user` | Slack username | `flagger`
 `msteams.url` | Microsoft Teams incoming webhook | None
 `podMonitor.enabled` | If `true`, create a PodMonitor for [monitoring the metrics](https://docs.flagger.app/usage/monitoring#metrics) | `false`
-`podMonitor.namespace` | Namespace where the PodMonitor is created | the same namespace 
-`podMonitor.interval` | Interval at which metrics should be scraped | `15s` 
+`podMonitor.namespace` | Namespace where the PodMonitor is created | the same namespace
+`podMonitor.interval` | Interval at which metrics should be scraped | `15s`
 `podMonitor.podMonitor` | Additional labels to add to the PodMonitor | `{}`
 `leaderElection.enabled` | If `true`, Flagger will run in HA mode | `false`
 `leaderElection.replicaCount` | Number of replicas | `1`
@@ -151,6 +155,8 @@ Parameter | Description | Default
 `ingressAnnotationsPrefix` | Annotations prefix for NGINX ingresses | None
 `ingressClass` | Ingress class used for annotating HTTPProxy objects, e.g. `contour` | None
 `podPriorityClassName` | PriorityClass name for pod priority configuration | ""
+`podDisruptionBudget.enabled` | A PodDisruptionBudget will be created if `true` | `false`
+`podDisruptionBudget.minAvailable` | The minimal number of available replicas that will be set in the PodDisruptionBudget | `1`
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade`. For example,
 
@@ -170,5 +176,3 @@ $ helm upgrade -i flagger flagger/flagger \
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
-
-

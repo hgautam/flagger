@@ -1,5 +1,5 @@
 /*
-Copyright The Flagger Authors.
+Copyright 2020 The Flux authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,17 +19,20 @@ limitations under the License.
 package v1beta1
 
 import (
-	v1beta1 "github.com/weaveworks/flagger/pkg/apis/appmesh/v1beta1"
+	v1beta1 "github.com/fluxcd/flagger/pkg/apis/appmesh/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
 
 // MeshLister helps list Meshes.
+// All objects returned here must be treated as read-only.
 type MeshLister interface {
 	// List lists all Meshes in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.Mesh, err error)
 	// Get retrieves the Mesh from the index for a given name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1beta1.Mesh, error)
 	MeshListerExpansion
 }

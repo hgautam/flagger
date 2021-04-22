@@ -1,8 +1,8 @@
 # Default values for flagger.
 
 image:
-  repository: weaveworks/flagger
-  tag: 1.4.2
+  repository: ghcr.io/fluxcd/flagger
+  tag: 1.7.0
   pullPolicy: IfNotPresent
   pullSecret:
 
@@ -125,6 +125,7 @@ prometheus:
   # to be used with ingress controllers
   install: false
   image: docker.io/prom/prometheus:v2.23.0
+  pullSecret:
   retention: 2h
 
 kubeconfigQPS: ""
@@ -138,3 +139,7 @@ istio:
     secretName: ""
     # istio.kubeconfig.key: The name of secret data key that contains the Istio control plane kubeconfig
     key: "kubeconfig"
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
